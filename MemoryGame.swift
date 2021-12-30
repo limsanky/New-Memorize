@@ -10,7 +10,10 @@ import Foundation
 struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: Array<Card>
     
-    private var indexOfTheOneAndOnlyFaceUpCard: Int?
+    private var indexOfTheOneAndOnlyFaceUpCard: Int? {
+        get { cards.indices.filter({ cards[$0].isFaceUp }).oneAndOnly }
+        set { cards.indices.forEach { cards[$0].isFaceUp = ($0 == newValue) } }
+    }
     
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         cards = [Card]()
@@ -28,22 +31,17 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
             !cards[chosenIndex].isFaceUp,
             !cards[chosenIndex].isMatched {
+            
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
-                    cards[chosenIndex].isMatched = true
+                    cards[potentialMatchIndex].isMatched = true
                 }
                 
-                indexOfTheOneAndOnlyFaceUpCard = nil
+                cards[chosenIndex].isFaceUp = true
             } else {
-                for index in cards.indices {
-                    cards[index].isFaceUp = false
-                }
-                
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
-            
-            cards[chosenIndex].isFaceUp.toggle()
         }
     }
     
@@ -53,6 +51,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 return index
             }
         }
+        
         return nil // bogus!
     }
     
@@ -63,5 +62,17 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var isMatched = false
         let content: CardContent
         let id: Int // Identifiable stub
+    }
+}
+
+// Extend Array Structure to return an optional of type [Element]
+// Returns the element if [count] is 1, else nil.
+extension Array {
+    var oneAndOnly: Element? {
+        if count == 1 {
+            return first
+        } else {
+            return nil
+        }
     }
 }
