@@ -8,34 +8,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    // Creating an Array
-    // Can be done:
-    //  1. Array<String>
-    //  2. [String]
-    var emojis = ["🚂", "✈️", "🚗", "🚓", "🚡", "🚚", "🚎", "🚑", "⛵️",
-                  "🚇", "🛵", "🛬", "🛫", "🛺", "🛰"]
-    @State var emojiCount = 14
-    let veg = "red pepper"
-
+    @ObservedObject var viewModel: EmojiMemoryGame
+    
     var body: some View {
-        VStack {
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
-                    ForEach(emojis[0..<emojiCount], id: \.self, content: { emoji in
-                        CardView(content: emoji).aspectRatio(2/3, contentMode: .fit)
-                    })
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
+                ForEach(viewModel.cards) { card in
+                    CardView(card: card)
+                        .aspectRatio(2/3, contentMode: .fit)
+                        .onTapGesture {
+                            viewModel.choose(card)
+                        }
                 }
             }
-            .foregroundColor(.red)
         }
+        .foregroundColor(.red)
         .padding(.horizontal)
     }
 }
 
 // Creating a new CardView as a struct instead
 struct CardView: View {
-    var content: String
-    @State var isFaceUp: Bool = true
+    let card: MemoryGame<String>.Card
    
     var body: some View {
         
@@ -43,7 +37,7 @@ struct CardView: View {
             // Local variable
             let shape = RoundedRectangle(cornerRadius: 20)
             
-            if isFaceUp {
+            if card.isFaceUp {
 
                 // Background
                 shape.fill().foregroundColor(.white)
@@ -51,14 +45,14 @@ struct CardView: View {
                 // Edge strokes => Changed to strokeBorder() instead of stroke()
                 shape.strokeBorder(lineWidth: 3)
                 
-                Text(content).font(.largeTitle)
+                Text(card.content).font(.largeTitle)
+            } else if card.isMatched {
+                // This makes the card invisible once they are matched.
+                shape.opacity(0)
             } else {
                 // Background
                 shape.fill().foregroundColor(.red)
             }
-        }
-        .onTapGesture {
-            isFaceUp = !isFaceUp
         }
 
     }
@@ -66,7 +60,11 @@ struct CardView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
-.previewInterfaceOrientation(.portrait)
+        let game = EmojiMemoryGame()
+        
+        ContentView(viewModel: game)
+.preferredColorScheme(.light)
+        ContentView(viewModel: game)
+.preferredColorScheme(.dark)
     }
 }
