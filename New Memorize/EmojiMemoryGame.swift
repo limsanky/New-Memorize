@@ -9,6 +9,7 @@ import SwiftUI
 
 
 class EmojiMemoryGame: ObservableObject {
+    typealias Card = MemoryGame<String>.Card
     // We make the two following properties [static], because they are required for any instance of EmojiMemoryGame!
     private static let emojis = ["🚂", "✈️", "🚗", "🚓", "🚡", "🚚", "🚎", "🚑", "⛵️",
                   "🚇", "🛵", "🛬", "🛫", "🛺", "🛰"]
@@ -23,13 +24,12 @@ class EmojiMemoryGame: ObservableObject {
     // because the ViewModel should be the only thing which can see the model.
     @Published private var model: MemoryGame<String> = EmojiMemoryGame.createMemoryGame()
 
-    
-    var cards: [MemoryGame<String>.Card] {
+    var cards: [Card] {
         return model.cards
     }
     
     // MARK: Intent(s)
-    func choose(_ card: MemoryGame<String>.Card) {
+    func choose(_ card: Card) {
         model.choose(card)
     }
 }
