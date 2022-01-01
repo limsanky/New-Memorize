@@ -58,7 +58,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     // We create the Card Structure inside MemoryGame,
     // since it specifies that this structure is a part of MemoryGame!
     struct Card: Identifiable {
-        var isFaceUp = true
+        var isFaceUp = false
         var isMatched = false
         let content: CardContent
         let id: Int // Identifiable stub
