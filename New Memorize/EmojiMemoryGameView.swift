@@ -37,46 +37,34 @@ struct CardView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Local variable
-                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
+                // Adding a Pie Shape in the middle
+                Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 110 - 90))
+                    .padding(5)
+                    .opacity(DrawingConstants.circleOpacity)
                 
-                if card.isFaceUp {
-
-                    // Background
-                    shape.fill().foregroundColor(.white)
-                    
-                    // Edge strokes => Changed to strokeBorder() instead of stroke()
-                    shape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
-                    
-                    // Adding a Pie Shape in the middle
-                    Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 110 - 90))
-                        .padding(5)
-                        .opacity(DrawingConstants.circleOpacity)
-                    
-                    Text(card.content)
-                        .font(font(in: geometry.size))
-                } else if card.isMatched {
-                    // This makes the card invisible once they are matched.
-                    shape.opacity(0)
-                } else {
-                    // Background
-                    shape.fill().foregroundColor(.red)
-                }
+                Text(card.content)
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(.linear(duration: 1).repeatForever(autoreverses: false), value: card.isMatched)
+                    .font(Font.system(size: DrawingConstants.fontSize))
+                    .scaleEffect(scale(thatFits: geometry.size))
             }
+            .cardify(isFaceUp: card.isFaceUp)
         }
-
     }
     
     // MARK: Control Panel
-    private func font(in size: CGSize) -> Font {
+    private func font(in size: CGSize) -> Font{
         Font.system(size: min(size.width, size.height) * DrawingConstants.fontScale)
     }
     
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) * DrawingConstants.fontScale / DrawingConstants.fontSize
+    }
+    
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 10
-        static let lineWidth: CGFloat = 3
         static let fontScale: CGFloat = 0.7
         static let circleOpacity: Double = 0.5
+        static let fontSize: CGFloat = 32
     }
     
 }
@@ -87,6 +75,7 @@ struct ContentView_Previews: PreviewProvider {
         game.choose(game.cards.first!)
         return EmojiMemoryGameView(game: game)
             .preferredColorScheme(.light)
+.previewInterfaceOrientation(.portraitUpsideDown)
 //        EmojiMemoryGameView(game: game)
 //            .preferredColorScheme(.dark)
     }
